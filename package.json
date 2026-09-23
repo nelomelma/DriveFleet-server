@@ -1,0 +1,1 @@
+{"name":"drivefleet-server","version":"1.0.0","type":"module","scripts":{"dev":"nodemon index.js","start":"node index.js"},"dependencies":{"cookie-parser":"latest","cors":"latest","dotenv":"latest","express":"latest","jsonwebtoken":"latest","mongodb":"latest"},"devDependencies":{"nodemon":"latest"}}
