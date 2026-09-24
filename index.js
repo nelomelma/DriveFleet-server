@@ -220,9 +220,28 @@ app.post("/cars", verifyToken, async (req, res) => {
     updatedAt: new Date(),
   };
 
-  if (car.dailyRentPrice <= 0 || car.seatCapacity <= 0) {
+  // Validate required text fields
+  if (
+    !car.carName ||
+    !car.pickupLocation ||
+    !car.description ||
+    !car.image.trim() ||
+    !car.carType.trim()
+  ) {
     return res.status(400).send({
-      message: "Price and seats must be positive",
+      message: "Please provide valid car details",
+    });
+  }
+
+  // Validate price and seat capacity
+  if (
+    !Number.isFinite(car.dailyRentPrice) ||
+    car.dailyRentPrice <= 0 ||
+    !Number.isInteger(car.seatCapacity) ||
+    car.seatCapacity < 1
+  ) {
+    return res.status(400).send({
+      message: "Please provide a valid price and seat capacity",
     });
   }
 
