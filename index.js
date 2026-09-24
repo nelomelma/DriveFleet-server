@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -385,10 +384,48 @@ app.delete("/cars/:id", verifyToken, async (req, res) => {
 
 // Create booking
 app.post("/bookings", verifyToken, async (req, res) => {
-  const { carId, driverNeeded, specialNote = "" } = req.body;
+  const {
+    carId,
+    driverNeeded = false,
+    specialNote = "",
+  } = req.body;
 
-  if (!validId(carId)) {
-    return res.status(400).send({ message: "Invalid car id" });
+  // Validate car ID
+  if (!carId || typeof carId !== "string" || !validId(carId)) {
+    return res.status(400).send({
+      message: "Please provide a valid car id",
+    });
+  }
+
+  // Validate driver option
+  const validDriverOptions = [
+    true,
+    false,
+    "true",
+    "false",
+    "Yes",
+    "No",
+  ];
+
+  if (!validDriverOptions.includes(driverNeeded)) {
+    return res.status(400).send({
+      message: "Please provide a valid driver option",
+    });
+  }
+
+  // Validate special note
+  if (typeof specialNote !== "string") {
+    return res.status(400).send({
+      message: "Special note must be text",
+    });
+  }
+
+  const trimmedNote = specialNote.trim();
+
+  if (trimmedNote.length > 500) {
+    return res.status(400).send({
+      message: "Special note cannot exceed 500 characters",
+    });
   }
 
   const car = await cars.findOne({
@@ -396,7 +433,9 @@ app.post("/bookings", verifyToken, async (req, res) => {
   });
 
   if (!car) {
-    return res.status(404).send({ message: "Car not found" });
+    return res.status(404).send({
+      message: "Car not found",
+    });
   }
 
   if (!car.availability) {
@@ -405,6 +444,7 @@ app.post("/bookings", verifyToken, async (req, res) => {
     });
   }
 
+  // Prevent duplicate confirmed bookings
   const duplicate = await bookings.findOne({
     carId,
     userEmail: req.user.email,
@@ -423,8 +463,10 @@ app.post("/bookings", verifyToken, async (req, res) => {
     carImage: car.image,
     totalPrice: Number(car.dailyRentPrice),
     driverNeeded:
-      driverNeeded === true || driverNeeded === "Yes",
-    specialNote: String(specialNote).trim(),
+      driverNeeded === true ||
+      driverNeeded === "true" ||
+      driverNeeded === "Yes",
+    specialNote: trimmedNote,
     userEmail: req.user.email,
     bookingDate: new Date(),
     status: "confirmed",
