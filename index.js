@@ -495,6 +495,13 @@ app.get("/my-bookings", verifyToken, async (req, res) => {
   );
 });
 
+// Handle unknown API routes
+app.use((req, res) => {
+  res.status(404).send({
+    message: "API route not found",
+  });
+});
+
 // Central error handler
 app.use((err, req, res, next) => {
   console.error(err);
