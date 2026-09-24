@@ -299,11 +299,56 @@ app.patch("/cars/:id", verifyToken, async (req, res) => {
     }
   }
 
+  // Validate rental price
   if (update.dailyRentPrice !== undefined) {
     update.dailyRentPrice = Number(update.dailyRentPrice);
+
+    if (
+      !Number.isFinite(update.dailyRentPrice) ||
+      update.dailyRentPrice <= 0
+    ) {
+      return res.status(400).send({
+        message: "Please provide a valid daily rental price",
+      });
+    }
   }
 
+  // Validate and trim editable text fields
+  const textFields = [
+    "description",
+    "image",
+    "carType",
+    "pickupLocation",
+  ];
+
+  for (const field of textFields) {
+    if (update[field] !== undefined) {
+      if (
+        typeof update[field] !== "string" ||
+        !update[field].trim()
+      ) {
+        return res.status(400).send({
+          message: `Please provide a valid ${field}`,
+        });
+      }
+
+      update[field] = update[field].trim();
+    }
+  }
+
+  // Validate availability
   if (update.availability !== undefined) {
+    if (
+      update.availability !== true &&
+      update.availability !== false &&
+      update.availability !== "true" &&
+      update.availability !== "false"
+    ) {
+      return res.status(400).send({
+        message: "Please provide valid availability",
+      });
+    }
+
     update.availability =
       update.availability === true ||
       update.availability === "true";
