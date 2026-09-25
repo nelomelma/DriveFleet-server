@@ -114,6 +114,14 @@ app.post("/jwt", (req, res) => {
   res.cookie("token", token, cookieOptions()).send({ success: true });
 });
 
+// Check whether JWT cookie is working
+app.get("/auth-check", verifyToken, (req, res) => {
+  res.send({
+    authenticated: true,
+    email: req.user.email,
+  });
+});
+
 // Logout
 app.post("/logout", (req, res) => {
   res
